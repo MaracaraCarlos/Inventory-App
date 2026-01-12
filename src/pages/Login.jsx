@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2, Moon, Sun } from 'lucide-react'
+import { useTheme } from '../lib/ThemeContext'
 import { cn } from '../lib/utils'
 
 export default function Login() {
@@ -11,6 +12,7 @@ export default function Login() {
     const [error, setError] = useState(null)
     const [showPassword, setShowPassword] = useState(false)
     const navigate = useNavigate()
+    const { theme, toggleTheme } = useTheme()
 
     useEffect(() => {
         // Check if already logged in
@@ -40,16 +42,22 @@ export default function Login() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black p-4 transition-colors duration-200">
+            <button
+                onClick={toggleTheme}
+                className="absolute top-4 right-4 p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+            >
+                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+            <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-transparent dark:border-gray-800 overflow-hidden transition-colors">
                 <div className="p-8">
                     <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
-                        <p className="text-gray-500 mt-2">Sign in to access your inventory</p>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome Back</h1>
+                        <p className="text-gray-500 dark:text-gray-400 mt-2">Sign in to access your inventory</p>
                     </div>
 
                     {error && (
-                        <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg">
+                        <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-700 dark:text-red-400 rounded-lg">
                             <p className="font-medium">Error</p>
                             <p className="text-sm">{error}</p>
                         </div>
@@ -57,7 +65,7 @@ export default function Login() {
 
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Email Address
                             </label>
                             <input
@@ -65,13 +73,13 @@ export default function Login() {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
                                 placeholder="you@example.com"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Password
                             </label>
                             <div className="relative">
@@ -80,13 +88,13 @@ export default function Login() {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none pr-10"
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none pr-10"
                                     placeholder="••••••••"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                                 >
                                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                 </button>
@@ -109,8 +117,8 @@ export default function Login() {
                         </button>
                     </form>
                 </div>
-                <div className="bg-gray-50 px-8 py-4 border-t border-gray-100 text-center">
-                    <p className="text-sm text-gray-500">
+                <div className="bg-gray-50 dark:bg-gray-800/50 px-8 py-4 border-t border-gray-100 dark:border-gray-800 text-center transition-colors">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                         Don't have an account? Reach out to administrator.
                     </p>
                 </div>
