@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { useAuth } from '../lib/AuthContext'
 import {
     LayoutDashboard,
     Package,
@@ -12,7 +12,8 @@ import {
     Moon,
     Sun,
     FileText,
-    BarChart3
+    BarChart3,
+    Users
 } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useLanguage } from '../lib/LanguageContext'
@@ -47,22 +48,12 @@ const SidebarItem = ({ icon: Icon, label, path, onClick }) => {
 
 export default function Layout({ children }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-    const [userEmail, setUserEmail] = useState('')
+    const { user, role, signOut } = useAuth()
     const { t, language, setLanguage } = useLanguage()
     const { theme, toggleTheme } = useTheme()
 
-    useEffect(() => {
-        const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (user) {
-                setUserEmail(user.email)
-            }
-        }
-        getUser()
-    }, [])
-
     const handleSignOut = async () => {
-        await supabase.auth.signOut()
+        await signOut()
     }
 
     const toggleLanguage = () => {
@@ -74,8 +65,10 @@ export default function Layout({ children }) {
         { icon: Globe, label: t('nav.projects'), path: '/projects' },
         { icon: Package, label: t('nav.products'), path: '/products' },
         { icon: History, label: t('nav.movements'), path: '/movements' },
+        { icon: Users, label: t('nav.suppliersContractors'), path: '/suppliers-contractors' },
         { icon: FileText, label: t('nav.reports'), path: '/reports' },
         { icon: BarChart3, label: t('nav.charts'), path: '/charts' },
+        ...(role === 'admin' ? [{ icon: FileText, label: 'Auditoría', path: '/audit' }] : []),
     ]
 
     return (
@@ -107,10 +100,15 @@ export default function Layout({ children }) {
                             <X size={20} />
                         </button>
                     </div>
-                    {userEmail && (
-                        <p className="text-xs text-gray-400 mb-8 truncate" title={userEmail}>
-                            {userEmail}
-                        </p>
+                    {user && (
+                        <div className="mb-8">
+                            <p className="text-xs text-gray-400 truncate" title={user.email}>
+                                {user.email}
+                            </p>
+                            <p className="text-xs font-semibold text-blue-500 uppercase mt-1">
+                                {role || 'Cargando...'}
+                            </p>
+                        </div>
                     )}
                 </div>
 

@@ -1,11 +1,18 @@
-import { Activity, Package, AlertTriangle, TrendingUp } from 'lucide-react'
+import { Activity, Package, AlertTriangle, TrendingUp, Globe, FileText, BarChart3, Users } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { cn } from '../lib/utils'
 import { useLanguage } from '../lib/LanguageContext'
 
-const StatCard = ({ label, value, icon: Icon, color, trend }) => (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow">
+const StatCard = ({ label, value, icon: Icon, color, trend, onClick }) => (
+    <div
+        onClick={onClick}
+        className={cn(
+            "bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all",
+            onClick && "cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+        )}
+    >
         <div className="flex items-start justify-between">
             <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
@@ -29,22 +36,26 @@ const StatCard = ({ label, value, icon: Icon, color, trend }) => (
 
 export default function Dashboard() {
     const { t } = useLanguage()
+    const navigate = useNavigate()
     const [stats, setStats] = useState({
         totalProducts: 0,
         lowStock: 0,
-        totalMovements: 0
+        totalMovements: 0,
+        totalProjects: 0
     })
 
     useEffect(() => {
         const fetchStats = async () => {
             const { count: productsCount } = await supabase.from('products').select('*', { count: 'exact', head: true })
-            const { count: lowStockCount } = await supabase.from('products').select('*', { count: 'exact', head: true }).lt('quantity', 5) // Assuming 5 is global low stock for summary
+            const { count: lowStockCount } = await supabase.from('products').select('*', { count: 'exact', head: true }).lt('quantity', 5)
             const { count: movementsCount } = await supabase.from('movements').select('*', { count: 'exact', head: true })
+            const { count: projectsCount } = await supabase.from('projects').select('*', { count: 'exact', head: true })
 
             setStats({
                 totalProducts: productsCount || 0,
                 lowStock: lowStockCount || 0,
-                totalMovements: movementsCount || 0
+                totalMovements: movementsCount || 0,
+                totalProjects: projectsCount || 0
             })
         }
         fetchStats()
@@ -58,23 +69,67 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* 1. Projects */}
+                <StatCard
+                    label={t('nav.projects')}
+                    value={stats.totalProjects}
+                    icon={Globe}
+                    color="bg-emerald-500"
+                    onClick={() => navigate('/projects')}
+                />
+
+                {/* 2. Total Products */}
                 <StatCard
                     label={t('dashboard.totalProducts')}
                     value={stats.totalProducts}
                     icon={Package}
                     color="bg-blue-500"
+                    onClick={() => navigate('/products')}
                 />
+
+                {/* 3. Low Stock */}
                 <StatCard
                     label={t('dashboard.lowStock')}
                     value={stats.lowStock}
                     icon={AlertTriangle}
                     color="bg-orange-500"
+                    onClick={() => navigate('/products?filter=lowStock')}
                 />
+
+                {/* 4. Total Movements */}
                 <StatCard
                     label={t('dashboard.totalMovements')}
                     value={stats.totalMovements}
                     icon={Activity}
                     color="bg-indigo-500"
+                    onClick={() => navigate('/movements')}
+                />
+
+                {/* 5. Companies (Empresas) */}
+                <StatCard
+                    label={t('nav.suppliersContractors')}
+                    value={stats.totalCompanies}
+                    icon={Users}
+                    color="bg-teal-500"
+                    onClick={() => navigate('/suppliers-contractors')}
+                />
+
+                {/* 6. Reports */}
+                <StatCard
+                    label={t('nav.reports')}
+                    value=""
+                    icon={FileText}
+                    color="bg-purple-500"
+                    onClick={() => navigate('/reports')}
+                />
+
+                {/* 7. Charts */}
+                <StatCard
+                    label={t('nav.charts')}
+                    value=""
+                    icon={BarChart3}
+                    color="bg-pink-500"
+                    onClick={() => navigate('/charts')}
                 />
             </div>
 

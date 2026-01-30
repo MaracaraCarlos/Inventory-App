@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { X, Trash2, Plus, Loader2 } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { categoryRepository } from '../repositories/categoryRepository'
 import { useLanguage } from '../lib/LanguageContext'
 
 export default function CategoryManager({ isOpen, onClose, onCategoryChange }) {
@@ -12,10 +12,7 @@ export default function CategoryManager({ isOpen, onClose, onCategoryChange }) {
 
     const fetchCategories = async () => {
         try {
-            const { data, error } = await supabase
-                .from('categories')
-                .select('*')
-                .order('name')
+            const { data, error } = await categoryRepository.getAllCategories()
 
             if (error) throw error
             setCategories(data || [])
@@ -38,9 +35,7 @@ export default function CategoryManager({ isOpen, onClose, onCategoryChange }) {
 
         setSubmitting(true)
         try {
-            const { error } = await supabase
-                .from('categories')
-                .insert([{ name: newCategory.trim() }])
+            const { error } = await categoryRepository.createCategory({ name: newCategory.trim() })
 
             if (error) throw error
 
@@ -58,7 +53,8 @@ export default function CategoryManager({ isOpen, onClose, onCategoryChange }) {
         if (!window.confirm(t('categories.deleteConfirm'))) return
 
         try {
-            // Check if used
+            // Check if used - need to import productRepository for this
+            const { supabase } = await import('../lib/supabase')
             const { count, error: checkError } = await supabase
                 .from('products')
                 .select('*', { count: 'exact', head: true })
@@ -71,10 +67,7 @@ export default function CategoryManager({ isOpen, onClose, onCategoryChange }) {
                 return
             }
 
-            const { error } = await supabase
-                .from('categories')
-                .delete()
-                .eq('id', id)
+            const { error } = await categoryRepository.deleteCategory(id)
 
             if (error) throw error
             fetchCategories()

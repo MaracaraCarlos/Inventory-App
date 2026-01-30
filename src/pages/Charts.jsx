@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { supabase } from '../lib/supabase'
+import { productRepository } from '../repositories/productRepository'
+import { movementRepository } from '../repositories/movementRepository'
 import { useLanguage } from '../lib/LanguageContext'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { Loader2, TrendingUp, Package, Download } from 'lucide-react'
@@ -24,19 +25,13 @@ export default function Charts() {
         setLoading(true)
         try {
             // Fetch products
-            const { data: productsData, error: productsError } = await supabase
-                .from('products')
-                .select('id, name, quantity')
-                .order('name')
+            const { data: productsData, error: productsError } = await productRepository.getAllProducts()
 
             if (productsError) throw productsError
             setProducts(productsData || [])
 
             // Fetch movements
-            const { data: movementsData, error: movementsError } = await supabase
-                .from('movements')
-                .select('*')
-                .order('created_at', { ascending: true })
+            const { data: movementsData, error: movementsError } = await movementRepository.getAllMovements()
 
             if (movementsError) throw movementsError
             setMovements(movementsData || [])
