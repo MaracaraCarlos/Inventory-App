@@ -11,7 +11,8 @@ export const translations = {
             title: 'Inventory',
             appTitle: 'Inventory App',
             projects: 'Projects',
-            charts: 'Charts'
+            charts: 'Charts',
+            suppliersContractors: 'Companies'
         },
         dashboard: {
             totalProducts: 'Total Products',
@@ -106,6 +107,9 @@ export const translations = {
             deletedProduct: 'Deleted Product',
             stockIn: 'Stock IN',
             stockOut: 'Stock OUT',
+            move: 'Move',
+            fromProject: 'From Project',
+            toProject: 'To Project',
             selectProduct: 'Select Product',
             chooseProduct: '-- Choose Product --',
             currentStock: 'Current',
@@ -114,7 +118,9 @@ export const translations = {
             errors: {
                 selectProduct: 'Please select a product',
                 productNotFound: 'Product not found',
-                insufficientStock: 'Insufficient stock for this operation'
+                insufficientStock: 'Insufficient global stock for this operation',
+                insufficientProjectStock: 'Insufficient stock in source project',
+                sameProjectTransfer: 'Source and destination projects cannot be the same'
             }
         },
         common: {
@@ -134,11 +140,17 @@ export const translations = {
             minStockLevel: 'Min Stock Level (Alert)',
             description: 'Description',
             saveChanges: 'Save Changes',
-            reports: 'Reports'
+            reports: 'Reports',
+            back: 'Back'
         },
         reports: {
             title: 'Reports',
             subtitle: 'Generate and export inventory reports',
+            stockAndMovements: 'Stock & Movements',
+            stockAndMovementsDesc: 'View current stock levels and detailed movement history',
+            deliveryNotes: 'Delivery Notes',
+            deliveryNotesDesc: 'Generate PDF delivery notes for grouped movements',
+            searchPlaceholder: 'Search movements...',
             currentStock: 'Current Stock',
             movements: 'Movements',
             exportPDF: 'Export PDF',
@@ -179,6 +191,44 @@ export const translations = {
             currentStock: 'Current Stock',
             maxStock: 'Maximum Stock',
             minStock: 'Minimum Stock'
+        },
+        supplierContractorHub: {
+            title: 'Companies',
+            subtitle: 'Manage your suppliers and contractors'
+        },
+        suppliers: {
+            title: 'Suppliers',
+            subtitle: 'Manage your suppliers',
+            description: 'Manage your suppliers information',
+            add: 'Register Supplier',
+            edit: 'Edit Supplier',
+            name: 'Name',
+            contactPerson: 'Contact Person',
+            phone: 'Phone',
+            email: 'Email',
+            address: 'Address',
+            search: 'Search suppliers...',
+            noResults: 'No suppliers found',
+            empty: 'No suppliers registered',
+            deleteConfirm: 'Are you sure you want to delete this supplier?',
+            deleteError: 'Error deleting supplier'
+        },
+        contractors: {
+            title: 'Contractors',
+            subtitle: 'Manage your contractors',
+            description: 'Manage your contractors information',
+            add: 'Register Contractor',
+            edit: 'Edit Contractor',
+            name: 'Name',
+            contactPerson: 'Contact Person',
+            phone: 'Phone',
+            email: 'Email',
+            address: 'Address',
+            search: 'Search contractors...',
+            noResults: 'No contractors found',
+            empty: 'No contractors registered',
+            deleteConfirm: 'Are you sure you want to delete this contractor?',
+            deleteError: 'Error deleting contractor'
         }
     },
     es: {
@@ -193,7 +243,8 @@ export const translations = {
             title: 'Inventario',
             appTitle: 'App Inventario',
             projects: 'Proyectos',
-            charts: 'Gráficos'
+            charts: 'Gráficos',
+            suppliersContractors: 'Empresas'
         },
         dashboard: {
             totalProducts: 'Total Productos',
@@ -290,6 +341,9 @@ export const translations = {
             // Modal specifics
             stockIn: 'Entrada Stock',
             stockOut: 'Salida Stock',
+            move: 'Mover',
+            fromProject: 'Desde Proyecto',
+            toProject: 'Hacia Proyecto',
             selectProduct: 'Seleccionar Producto',
             chooseProduct: '-- Elegir Producto --',
             currentStock: 'Actual',
@@ -298,7 +352,9 @@ export const translations = {
             errors: {
                 selectProduct: 'Por favor seleccione un producto',
                 productNotFound: 'Producto no encontrado',
-                insufficientStock: 'Stock insuficiente para esta operación'
+                insufficientStock: 'Stock global insuficiente para esta operación',
+                insufficientProjectStock: 'Stock insuficiente en proyecto de origen',
+                sameProjectTransfer: 'El proyecto de origen y destino no pueden ser el mismo'
             }
         },
         common: {
@@ -318,11 +374,18 @@ export const translations = {
             minStockLevel: 'Nivel Mínimo de Stock (Alerta)',
             description: 'Descripción',
             saveChanges: 'Guardar Cambios',
-            reports: 'Reportes'
+            reports: 'Reportes',
+            back: 'Volver',
+            optional: 'Opcional'
         },
         reports: {
             title: 'Reportes',
             subtitle: 'Genere y exporte informes de su inventario',
+            stockAndMovements: 'Stock Actual y Movimientos',
+            stockAndMovementsDesc: 'Ver niveles de stock actuales e historial detallado de movimientos',
+            deliveryNotes: 'Notas de Entrega',
+            deliveryNotesDesc: 'Generar notas de entrega en PDF para movimientos agrupados',
+            searchPlaceholder: 'Buscar en movimientos...',
             currentStock: 'Stock Actual',
             movements: 'Movimientos',
             exportPDF: 'Exportar PDF',
@@ -363,6 +426,44 @@ export const translations = {
             currentStock: 'Stock Actual',
             maxStock: 'Stock Máximo',
             minStock: 'Stock Mínimo'
+        },
+        supplierContractorHub: {
+            title: 'Proveedores y Contratistas',
+            subtitle: 'Gestione sus proveedores y contratistas'
+        },
+        suppliers: {
+            title: 'Proveedores',
+            subtitle: 'Gestione sus proveedores',
+            description: 'Gestione la información de sus proveedores',
+            add: 'Registrar Proveedor',
+            edit: 'Editar Proveedor',
+            name: 'Nombre',
+            contactPerson: 'Persona de Contacto',
+            phone: 'Teléfono',
+            email: 'Correo Electrónico',
+            address: 'Dirección',
+            search: 'Buscar proveedores...',
+            noResults: 'No se encontraron proveedores',
+            empty: 'No hay proveedores registrados',
+            deleteConfirm: '¿Está seguro de que desea eliminar este proveedor?',
+            deleteError: 'Error al eliminar proveedor'
+        },
+        contractors: {
+            title: 'Contratistas',
+            subtitle: 'Gestione sus contratistas',
+            description: 'Gestione la información de sus contratistas',
+            add: 'Registrar Contratista',
+            edit: 'Editar Contratista',
+            name: 'Nombre',
+            contactPerson: 'Persona de Contacto',
+            phone: 'Teléfono',
+            email: 'Correo Electrónico',
+            address: 'Dirección',
+            search: 'Buscar contratistas...',
+            noResults: 'No se encontraron contratistas',
+            empty: 'No hay contratistas registrados',
+            deleteConfirm: '¿Está seguro de que desea eliminar este contratista?',
+            deleteError: 'Error al eliminar contratista'
         }
     }
 }

@@ -1,35 +1,38 @@
 import { useState, useEffect } from 'react'
 import { X, Loader2 } from 'lucide-react'
-import { projectRepository } from '../repositories/projectRepository'
+import { contractorRepository } from '../repositories/contractorRepository'
 import { useLanguage } from '../lib/LanguageContext'
 
-export default function ProjectFormModal({ isOpen, onClose, projectToEdit, onProjectSaved }) {
+export default function ContractorFormModal({ isOpen, onClose, contractorToEdit, onContractorSaved }) {
     const { t } = useLanguage()
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
         name: '',
-        location: '',
-        start_date: '',
-        end_date: ''
+        contact_person: '',
+        phone: '',
+        email: '',
+        address: ''
     })
 
     useEffect(() => {
-        if (projectToEdit) {
+        if (contractorToEdit) {
             setFormData({
-                name: projectToEdit.name,
-                location: projectToEdit.location || '',
-                start_date: projectToEdit.start_date || '',
-                end_date: projectToEdit.end_date || ''
+                name: contractorToEdit.name,
+                contact_person: contractorToEdit.contact_person || '',
+                phone: contractorToEdit.phone || '',
+                email: contractorToEdit.email || '',
+                address: contractorToEdit.address || ''
             })
         } else {
             setFormData({
                 name: '',
-                location: '',
-                start_date: '',
-                end_date: ''
+                contact_person: '',
+                phone: '',
+                email: '',
+                address: ''
             })
         }
-    }, [projectToEdit, isOpen])
+    }, [contractorToEdit, isOpen])
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -38,20 +41,21 @@ export default function ProjectFormModal({ isOpen, onClose, projectToEdit, onPro
         try {
             const dataToSave = {
                 name: formData.name,
-                location: formData.location || null,
-                start_date: formData.start_date || null,
-                end_date: formData.end_date || null
+                contact_person: formData.contact_person || null,
+                phone: formData.phone || null,
+                email: formData.email || null,
+                address: formData.address || null
             }
 
-            if (projectToEdit) {
-                const { error } = await projectRepository.updateProject(projectToEdit.id, dataToSave)
+            if (contractorToEdit) {
+                const { error } = await contractorRepository.updateContractor(contractorToEdit.id, dataToSave)
                 if (error) throw error
             } else {
-                const { error } = await projectRepository.createProject(dataToSave)
+                const { error } = await contractorRepository.createContractor(dataToSave)
                 if (error) throw error
             }
 
-            onProjectSaved()
+            onContractorSaved()
             onClose()
         } catch (error) {
             alert(t('common.error') + ': ' + error.message)
@@ -67,7 +71,7 @@ export default function ProjectFormModal({ isOpen, onClose, projectToEdit, onPro
             <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg shadow-xl">
                 <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                        {projectToEdit ? t('common.edit') : t('projects.add')}
+                        {contractorToEdit ? t('contractors.edit') : t('contractors.add')}
                     </h2>
                     <button
                         onClick={onClose}
@@ -80,7 +84,7 @@ export default function ProjectFormModal({ isOpen, onClose, projectToEdit, onPro
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            {t('projects.name')}
+                            {t('contractors.name')} *
                         </label>
                         <input
                             type="text"
@@ -93,12 +97,12 @@ export default function ProjectFormModal({ isOpen, onClose, projectToEdit, onPro
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            {t('projects.location')}
+                            {t('contractors.contactPerson')}
                         </label>
                         <input
                             type="text"
-                            value={formData.location}
-                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                            value={formData.contact_person}
+                            onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                         />
                     </div>
@@ -106,26 +110,38 @@ export default function ProjectFormModal({ isOpen, onClose, projectToEdit, onPro
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                {t('projects.startDate')}
+                                {t('contractors.phone')}
                             </label>
                             <input
-                                type="date"
-                                value={formData.start_date}
-                                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                                type="tel"
+                                value={formData.phone}
+                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                {t('projects.endDate')}
+                                {t('contractors.email')}
                             </label>
                             <input
-                                type="date"
-                                value={formData.end_date}
-                                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                                type="email"
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {t('contractors.address')}
+                        </label>
+                        <textarea
+                            rows="2"
+                            value={formData.address}
+                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                        />
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-4">

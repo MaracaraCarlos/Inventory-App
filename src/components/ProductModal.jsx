@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react'
 import { X, Loader2 } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { productRepository } from '../repositories/productRepository'
+import { categoryRepository } from '../repositories/categoryRepository'
 import { useLanguage } from '../lib/LanguageContext'
 
 export default function ProductModal({ isOpen, onClose, productToEdit, onProductSaved }) {
     const { t } = useLanguage()
     const [loading, setLoading] = useState(false)
     const [categories, setCategories] = useState([])
-    const [projects, setProjects] = useState([])
+
     const [formData, setFormData] = useState({
         name: '',
         sku: '',
         category_id: '',
-        project_id: '',
         quantity: 0,
         price: 0,
         min_stock_level: 5,
@@ -20,11 +20,8 @@ export default function ProductModal({ isOpen, onClose, productToEdit, onProduct
     })
 
     const fetchData = async () => {
-        const { data: catData } = await supabase.from('categories').select('*').order('name')
+        const { data: catData } = await categoryRepository.getAllCategories()
         setCategories(catData || [])
-
-        const { data: projData } = await supabase.from('projects').select('*').order('name')
-        setProjects(projData || [])
     }
 
     useEffect(() => {
@@ -37,7 +34,6 @@ export default function ProductModal({ isOpen, onClose, productToEdit, onProduct
                 name: productToEdit.name,
                 sku: productToEdit.sku || '',
                 category_id: productToEdit.category_id || '',
-                project_id: productToEdit.project_id || '',
                 quantity: productToEdit.quantity,
                 price: productToEdit.price,
                 min_stock_level: productToEdit.min_stock_level,
@@ -48,7 +44,6 @@ export default function ProductModal({ isOpen, onClose, productToEdit, onProduct
                 name: '',
                 sku: '',
                 category_id: '',
-                project_id: '',
                 quantity: 0,
                 price: 0,
                 min_stock_level: 5,
@@ -63,15 +58,10 @@ export default function ProductModal({ isOpen, onClose, productToEdit, onProduct
 
         try {
             if (productToEdit) {
-                const { error } = await supabase
-                    .from('products')
-                    .update(formData)
-                    .eq('id', productToEdit.id)
+                const { error } = await productRepository.updateProduct(productToEdit.id, formData)
                 if (error) throw error
             } else {
-                const { error } = await supabase
-                    .from('products')
-                    .insert([formData])
+                const { error } = await productRepository.createProduct(formData)
                 if (error) throw error
             }
             onProductSaved()
@@ -145,21 +135,7 @@ export default function ProductModal({ isOpen, onClose, productToEdit, onProduct
                             </select>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {t('products.project')}
-                            </label>
-                            <select
-                                value={formData.project_id}
-                                onChange={(e) => setFormData({ ...formData, project_id: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                            >
-                                <option value="">{t('products.selectProject')}</option>
-                                {projects.map(proj => (
-                                    <option key={proj.id} value={proj.id}>{proj.name}</option>
-                                ))}
-                            </select>
-                        </div>
+
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

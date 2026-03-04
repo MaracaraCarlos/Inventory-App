@@ -1,17 +1,22 @@
 import { useState, useEffect } from 'react'
 import { Plus, Search, Edit2, Trash2, Calendar, MapPin, Loader2, X, AlertTriangle } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { projectRepository } from '../repositories/projectRepository'
+import { authRepository } from '../repositories/authRepository'
 import { useLanguage } from '../lib/LanguageContext'
 import { cn } from '../lib/utils'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../lib/AuthContext'
 import ProjectFormModal from '../components/ProjectFormModal'
 
 export default function Projects() {
     const { t } = useLanguage()
+    const { item } = useAuth()
     const [projects, setProjects] = useState([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingProject, setEditingProject] = useState(null)
+    const navigate = useNavigate()
 
     // Delete confirmation modal state
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -24,13 +29,19 @@ export default function Projects() {
     const fetchProjects = async () => {
         setLoading(true)
         try {
-            const { data, error } = await supabase
-                .from('projects')
-                .select('*')
-                .order('name')
+            const { data, error } = await projectRepository.getAllProjects()
 
             if (error) throw error
-            setProjects(data || [])
+            const centralWarehouse = {
+                id: 'central-warehouse',
+                name: 'Almacén Central',
+                location: 'Principal',
+                start_date: null,
+                end_date: null,
+                is_virtual: true
+            }
+
+            setProjects([centralWarehouse, ...(data || [])])
         } catch (error) {
             console.error('Error fetching projects:', error)
         } finally {
@@ -67,10 +78,7 @@ export default function Projects() {
 
         try {
             // Verify user credentials
-            const { error: authError } = await supabase.auth.signInWithPassword({
-                email: deleteEmail,
-                password: deletePassword
-            })
+            const { error: authError } = await authRepository.signIn(deleteEmail, deletePassword)
 
             if (authError) {
                 setDeleteError(t('projects.authError'))
@@ -79,10 +87,7 @@ export default function Projects() {
             }
 
             // Check if project is in use
-            const { count, error: checkError } = await supabase
-                .from('products')
-                .select('*', { count: 'exact', head: true })
-                .eq('project_id', projectToDelete.id)
+            const { count, error: checkError } = await projectRepository.checkProjectInUse(projectToDelete.id)
 
             if (checkError) throw checkError
 
@@ -93,10 +98,7 @@ export default function Projects() {
             }
 
             // Delete the project
-            const { error } = await supabase
-                .from('projects')
-                .delete()
-                .eq('id', projectToDelete.id)
+            const { error } = await projectRepository.deleteProject(projectToDelete.id)
 
             if (error) throw error
 
@@ -119,6 +121,11 @@ export default function Projects() {
         setIsModalOpen(true)
     }
 
+    const handleProjectClick = (projectId) => {
+        // Navigate to Products page with filtered project
+        navigate(`/products?project=${projectId}`)
+    }
+
     const filteredProjects = projects.filter(proj =>
         proj.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (proj.location && proj.location.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -131,13 +138,15 @@ export default function Projects() {
                     <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t('projects.title')}</h2>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">{t('projects.subtitle')}</p>
                 </div>
-                <button
-                    onClick={handleAddNew}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors shadow-sm"
-                >
-                    <Plus size={20} />
-                    <span>{t('projects.add')}</span>
-                </button>
+                {item.canCreate && (
+                    <button
+                        onClick={handleAddNew}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors shadow-sm"
+                    >
+                        <Plus size={20} />
+                        <span>{t('projects.add')}</span>
+                    </button>
+                )}
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
@@ -182,7 +191,11 @@ export default function Projects() {
                                 </tr>
                             ) : (
                                 filteredProjects.map(project => (
-                                    <tr key={project.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
+                                    <tr
+                                        key={project.id}
+                                        onClick={() => handleProjectClick(project.id)}
+                                        className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group cursor-pointer"
+                                    >
                                         <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
                                             {project.name}
                                         </td>
@@ -210,21 +223,27 @@ export default function Projects() {
                                                 </div>
                                             ) : '-'}
                                         </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    onClick={() => handleEdit(project)}
-                                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                                                >
-                                                    <Edit2 size={18} />
-                                                </button>
-                                                <button
-                                                    onClick={() => openDeleteModal(project)}
-                                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </div>
+                                        <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                                            {!project.is_virtual && (
+                                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    {item.canEdit && (
+                                                        <button
+                                                            onClick={() => handleEdit(project)}
+                                                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                                        >
+                                                            <Edit2 size={18} />
+                                                        </button>
+                                                    )}
+                                                    {item.canDelete && (
+                                                        <button
+                                                            onClick={() => openDeleteModal(project)}
+                                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
                                         </td>
                                     </tr>
                                 ))
@@ -283,7 +302,7 @@ export default function Projects() {
                                     onChange={(e) => setDeleteEmail(e.target.value)}
                                     required
                                     className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                                    placeholder={t('projects.emailPlaceholder')}
+                                    placeholder={t('products.emailPlaceholder')}
                                 />
                             </div>
 
